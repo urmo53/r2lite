@@ -25,6 +25,8 @@
       --bg-brightness: 0.78;
       --volume-thickness: 8px;
       --wallpaper-scale: 1.13;
+      --live-red: #ff3b30;
+      --live-red-rgb: 255, 59, 48;
     }
 
     * {
@@ -287,10 +289,10 @@
       background: linear-gradient(
         90deg,
         rgba(var(--accent-rgb), 0.18) 0%,
-        rgba(var(--accent-rgb), 0.95) 55%,
+        rgba(var(--accent-rgb), 0.98) 55%,
         rgba(var(--accent-rgb), 0.18) 100%
       );
-      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.28);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.34);
       transform: translateX(0);
       will-change: transform;
       transition: background 700ms ease, box-shadow 700ms ease;
@@ -311,7 +313,7 @@
     .track-meta {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
       width: 100%;
       max-width: 360px;
       margin-top: 2px;
@@ -413,6 +415,105 @@
       }
     }
 
+    .live-badge-row {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 2px;
+    }
+
+    .live-badge {
+      appearance: none;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      min-height: 28px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow:
+        0 8px 20px rgba(0,0,0,0.22),
+        inset 0 0 0 1px rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition:
+        transform 180ms ease,
+        background 220ms ease,
+        box-shadow 220ms ease,
+        opacity 220ms ease,
+        color 220ms ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .live-badge:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.10);
+    }
+
+    .live-badge:active {
+      transform: translateY(0);
+    }
+
+    .live-badge.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      padding-left: 0;
+      padding-right: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .live-badge.is-live {
+      background: rgba(var(--live-red-rgb), 0.18);
+      color: #ffffff;
+      box-shadow:
+        0 8px 20px rgba(0,0,0,0.22),
+        inset 0 0 0 1px rgba(var(--live-red-rgb), 0.24),
+        0 0 18px rgba(var(--live-red-rgb), 0.14);
+    }
+
+    .live-badge.is-behind {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35);
+      transition: background 700ms ease;
+    }
+
+    .live-badge.is-live .live-dot {
+      background: var(--live-red);
+      box-shadow: 0 0 0 0 rgba(var(--live-red-rgb), 0.35);
+      animation: liveDotPulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes liveDotPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(var(--live-red-rgb), 0.35);
+        opacity: 0.95;
+      }
+      50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 8px rgba(var(--live-red-rgb), 0);
+        opacity: 1;
+      }
+    }
+
     .bottom-block {
       display: flex;
       flex-direction: column;
@@ -445,10 +546,10 @@
     .big-play-btn {
       appearance: none;
       border: none;
-      width: 92px;
-      height: 92px;
-      min-width: 92px;
-      min-height: 92px;
+      width: 82px;
+      height: 82px;
+      min-width: 82px;
+      min-height: 82px;
       border-radius: 999px;
       padding: 0;
       position: relative;
@@ -456,12 +557,16 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      background: rgba(var(--accent-rgb), 0.16);
+      background: linear-gradient(
+        180deg,
+        rgba(var(--accent-rgb), 0.42) 0%,
+        rgba(var(--accent-rgb), 0.28) 100%
+      );
       color: var(--text);
       box-shadow:
-        0 10px 30px rgba(0,0,0,0.28),
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        0 0 30px rgba(var(--accent-rgb), 0.18);
+        0 12px 34px rgba(0,0,0,0.30),
+        inset 0 0 0 1px rgba(255,255,255,0.12),
+        0 0 34px rgba(var(--accent-rgb), 0.30);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       transition:
@@ -474,9 +579,9 @@
     .big-play-btn:hover {
       transform: scale(1.03);
       box-shadow:
-        0 16px 36px rgba(0,0,0,0.32),
-        inset 0 0 0 1px rgba(255,255,255,0.10),
-        0 0 40px rgba(var(--accent-rgb), 0.24);
+        0 18px 40px rgba(0,0,0,0.34),
+        inset 0 0 0 1px rgba(255,255,255,0.14),
+        0 0 44px rgba(var(--accent-rgb), 0.38);
     }
 
     .big-play-btn:active {
@@ -489,36 +594,40 @@
     }
 
     .big-play-btn.is-playing {
-      background: rgba(var(--accent-rgb), 0.24);
+      background: linear-gradient(
+        180deg,
+        rgba(var(--accent-rgb), 0.58) 0%,
+        rgba(var(--accent-rgb), 0.34) 100%
+      );
       animation: playingButtonBreath 2.8s ease-in-out infinite;
     }
 
     @keyframes playingButtonBreath {
       0%, 100% {
         box-shadow:
-          0 10px 30px rgba(0,0,0,0.28),
-          inset 0 0 0 1px rgba(255,255,255,0.08),
-          0 0 24px rgba(var(--accent-rgb), 0.16);
+          0 12px 34px rgba(0,0,0,0.30),
+          inset 0 0 0 1px rgba(255,255,255,0.12),
+          0 0 30px rgba(var(--accent-rgb), 0.24);
       }
       50% {
         box-shadow:
-          0 14px 36px rgba(0,0,0,0.32),
-          inset 0 0 0 1px rgba(255,255,255,0.10),
-          0 0 44px rgba(var(--accent-rgb), 0.30);
+          0 16px 40px rgba(0,0,0,0.34),
+          inset 0 0 0 1px rgba(255,255,255,0.14),
+          0 0 50px rgba(var(--accent-rgb), 0.48);
       }
     }
 
     .big-play-icon {
       position: relative;
       z-index: 4;
-      font-size: 34px;
+      font-size: 30px;
       line-height: 1;
-      width: 34px;
+      width: 30px;
       text-align: center;
-      color: var(--accent);
+      color: #ffffff;
       text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
+        0 3px 18px rgba(0,0,0,0.34),
+        0 1px 2px rgba(0,0,0,0.18);
       transition: color 700ms ease;
     }
 
@@ -526,7 +635,7 @@
       position: absolute;
       inset: -8px;
       border-radius: 999px;
-      border: 2px solid rgba(var(--accent-rgb), 0.35);
+      border: 2px solid rgba(var(--accent-rgb), 0.48);
       z-index: 1;
       animation: none;
       opacity: 0;
@@ -546,7 +655,7 @@
     @keyframes pulseRing {
       0% {
         transform: scale(0.92);
-        opacity: 0.75;
+        opacity: 0.8;
       }
       70% {
         transform: scale(1.22);
@@ -562,7 +671,7 @@
       position: absolute;
       inset: -14px;
       border-radius: 999px;
-      border: 1.5px solid rgba(var(--accent-rgb), 0.30);
+      border: 1.5px solid rgba(var(--accent-rgb), 0.42);
       z-index: 2;
       pointer-events: none;
       opacity: 0.9;
@@ -581,14 +690,14 @@
     @keyframes haloSpin {
       0% {
         transform: rotate(0deg);
-        opacity: 0.52;
+        opacity: 0.56;
       }
       50% {
-        opacity: 0.95;
+        opacity: 1;
       }
       100% {
         transform: rotate(360deg);
-        opacity: 0.52;
+        opacity: 0.56;
       }
     }
 
@@ -734,50 +843,116 @@
 
       .app {
         min-height: 100vh;
-        padding: 30px 20px 88px;
+        padding: 24px 18px 84px;
       }
 
       .container {
         width: 100%;
-        max-width: 440px;
+        max-width: 430px;
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 28px;
         text-align: center;
       }
 
-      .art-wrap,
-      .text {
+      .art-wrap {
         width: 100%;
+        max-width: 340px;
         height: auto;
+        aspect-ratio: 1 / 1;
+        margin: 0 auto;
       }
 
-      .text,
-      .top-block,
-      .bottom-block,
-      .track-meta {
+      .text {
+        width: 100%;
+        min-height: auto;
+        gap: 18px;
+        justify-content: flex-start;
         align-items: center;
       }
 
-      .track-meta {
-        max-width: 100%;
+      .top-block,
+      .bottom-block,
+      .track-meta,
+      .player-host,
+      .custom-player {
+        width: 100%;
+        max-width: 340px;
+        align-items: center;
+      }
+
+      .top-block {
+        padding-top: 0;
+        gap: 12px;
       }
 
       .top-line-wrap {
         max-width: 100%;
         justify-content: center;
+        margin-bottom: 2px;
       }
 
       .now-playing-line {
         max-width: 100%;
       }
 
+      .r2 {
+        font-size: 56px;
+      }
+
+      .artist {
+        font-size: 15px;
+      }
+
+      .title-wrap {
+        width: 100%;
+      }
+
+      .title {
+        font-size: 26px;
+        text-align: center;
+      }
+
+      .live-badge-row {
+        justify-content: center;
+        max-width: 100%;
+        margin-top: 0;
+      }
+
+      .bottom-block {
+        gap: 14px;
+      }
+
       .player-host {
         max-width: 100%;
       }
 
+      .custom-player {
+        gap: 14px;
+      }
+
+      .player-main-row {
+        margin-top: 0;
+      }
+
+      .big-play-btn {
+        width: 72px;
+        height: 72px;
+        min-width: 72px;
+        min-height: 72px;
+      }
+
+      .big-play-icon {
+        font-size: 26px;
+        width: 26px;
+      }
+
+      .volume-wrap {
+        max-width: 260px;
+      }
+
       .corner-logo img {
-        max-width: 160px;
-        max-height: 56px;
+        max-width: 150px;
+        max-height: 54px;
       }
     }
   </style>
@@ -810,6 +985,13 @@
             <div class="title-wrap">
               <div id="title" class="title">Laadimine...</div>
             </div>
+          </div>
+
+          <div class="live-badge-row">
+            <button id="liveBadge" class="live-badge is-hidden" type="button" aria-label="Mine live striimi peale">
+              <span class="live-dot"></span>
+              <span id="liveBadgeText">LIVE</span>
+            </button>
           </div>
         </div>
 
@@ -873,6 +1055,8 @@
     const bigPlayIcon = document.getElementById("bigPlayIcon");
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeWrap = document.getElementById("volumeWrap");
+    const liveBadge = document.getElementById("liveBadge");
+    const liveBadgeText = document.getElementById("liveBadgeText");
 
     let currentArtwork = null;
     let currentTrackKey = "";
@@ -1424,6 +1608,42 @@
       progressAnimFrame = requestAnimationFrame(tick);
     }
 
+    function isAtLiveEdge() {
+      if (!mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) {
+        return false;
+      }
+
+      const range = shakaPlayer.seekRange();
+      if (!range || !Number.isFinite(range.end)) return false;
+
+      const diff = range.end - mediaEl.currentTime;
+      return diff <= 4;
+    }
+
+    function updateLiveBadge() {
+      if (!liveBadge || !mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) {
+        if (liveBadge) liveBadge.classList.add("is-hidden");
+        return;
+      }
+
+      liveBadge.classList.remove("is-hidden");
+
+      const atLive = isAtLiveEdge();
+      liveBadge.classList.toggle("is-live", atLive);
+      liveBadge.classList.toggle("is-behind", !atLive);
+      liveBadgeText.textContent = atLive ? "LIVE" : "mine LIVE";
+    }
+
+    function goToLiveEdge() {
+      if (!mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) return;
+
+      const range = shakaPlayer.seekRange();
+      if (!range || !Number.isFinite(range.end)) return;
+
+      mediaEl.currentTime = Math.max(range.end - 2, range.start || 0);
+      updateLiveBadge();
+    }
+
     async function initPlayer() {
       try {
         if (!window.shaka) {
@@ -1482,31 +1702,41 @@
         mediaEl.addEventListener("play", () => {
           setPlayerStatus("");
           updateBigPlayState();
+          updateLiveBadge();
         });
 
         mediaEl.addEventListener("pause", () => {
           setPlayerStatus("");
           updateBigPlayState();
+          updateLiveBadge();
         });
 
         mediaEl.addEventListener("waiting", () => {
           setPlayerStatus("Puhverdan...");
+          updateLiveBadge();
         });
 
         mediaEl.addEventListener("loadeddata", () => {
           setPlayerStatus("");
           updateBigPlayState();
+          updateLiveBadge();
+        });
+
+        mediaEl.addEventListener("timeupdate", () => {
+          updateLiveBadge();
         });
 
         mediaEl.addEventListener("error", () => {
           setPlayerStatus("Meediaelement andis vea.");
           updateBigPlayState();
+          updateLiveBadge();
         });
 
         await shakaPlayer.load(HLS_STREAM);
         mediaEl.volume = Number(volumeSlider.value || 1);
         updateVolumeThickness();
         updateBigPlayState();
+        updateLiveBadge();
         setPlayerStatus("");
       } catch (error) {
         console.error("initPlayer error:", error);
@@ -1525,10 +1755,27 @@
         }
 
         updateBigPlayState();
+        updateLiveBadge();
       } catch (error) {
         console.error("play button error", error);
         setPlayerStatus("Taasesitust ei saanud käivitada.");
         updateBigPlayState();
+        updateLiveBadge();
+      }
+    });
+
+    liveBadge.addEventListener("click", async () => {
+      try {
+        goToLiveEdge();
+
+        if (mediaEl && mediaEl.paused) {
+          await mediaEl.play();
+        }
+
+        updateBigPlayState();
+        updateLiveBadge();
+      } catch (error) {
+        console.error("live badge error", error);
       }
     });
 
