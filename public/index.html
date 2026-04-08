@@ -17,12 +17,14 @@
     :root {
       --text: #ffffff;
       --text-soft: rgba(255,255,255,0.72);
-      --accent: #58a6ff;
+      --accent: rgb(88, 166, 255);
       --accent-rgb: 88, 166, 255;
       --shadow-strong: rgba(0,0,0,0.42);
       --shadow-soft: rgba(0,0,0,0.22);
       --glow: rgba(88,166,255,0.12);
       --bg-brightness: 0.78;
+      --volume-thickness: 8px;
+      --wallpaper-scale: 1.13;
     }
 
     * {
@@ -66,11 +68,11 @@
       height: 100%;
       object-fit: cover;
       filter: blur(22px) brightness(var(--bg-brightness)) saturate(1.04) contrast(1.03);
-      transform: scale(1.12);
+      transform: scale(var(--wallpaper-scale));
       transition:
         opacity 700ms ease,
-        transform 900ms cubic-bezier(.22,.61,.36,1),
-        filter 1000ms ease;
+        transform 1400ms cubic-bezier(.22,.61,.36,1),
+        filter 1200ms ease;
       will-change: transform, opacity, filter;
     }
 
@@ -95,14 +97,14 @@
         radial-gradient(circle at 35% 50%, var(--glow) 0%, transparent 38%),
         radial-gradient(circle at 70% 52%, rgba(var(--accent-rgb), 0.06) 0%, transparent 32%);
       opacity: 1;
-      transition: background 500ms ease, opacity 300ms ease;
+      transition: background 700ms ease, opacity 300ms ease;
       pointer-events: none;
     }
 
     .app {
       position: relative;
       z-index: 1;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -115,7 +117,7 @@
       display: grid;
       grid-template-columns: 440px 440px;
       gap: 80px;
-      align-items: center;
+      align-items: start;
       justify-content: center;
     }
 
@@ -136,8 +138,55 @@
       background: radial-gradient(circle at center, var(--glow) 0%, transparent 65%);
       filter: blur(20px);
       opacity: 0.9;
-      transition: background 400ms ease, opacity 300ms ease;
+      transition: background 700ms ease, opacity 300ms ease;
       pointer-events: none;
+    }
+
+    .art-sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .art-sweep::before {
+      content: "";
+      position: absolute;
+      top: -10%;
+      left: -40%;
+      width: 32%;
+      height: 120%;
+      transform: skewX(-18deg) translateX(0);
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.14) 35%,
+        rgba(255,255,255,0.34) 50%,
+        rgba(255,255,255,0.14) 65%,
+        rgba(255,255,255,0) 100%
+      );
+      opacity: 0;
+      filter: blur(6px);
+    }
+
+    .art-sweep.run::before {
+      animation: artSweep 700ms cubic-bezier(.22,.61,.36,1);
+    }
+
+    @keyframes artSweep {
+      0% {
+        transform: skewX(-18deg) translateX(0);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: skewX(-18deg) translateX(520%);
+        opacity: 0;
+      }
     }
 
     .art {
@@ -153,7 +202,7 @@
       transition:
         opacity 620ms ease,
         transform 900ms cubic-bezier(.22,.61,.36,1),
-        box-shadow 500ms ease;
+        box-shadow 700ms ease;
       transform: scale(1);
       will-change: transform, opacity;
     }
@@ -162,31 +211,30 @@
       animation: artBump 650ms cubic-bezier(.22,.61,.36,1);
     }
 
+    .art.is-swapping {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+
     @keyframes artBump {
       0%   { transform: scale(1); }
       35%  { transform: scale(1.028); }
       100% { transform: scale(1); }
     }
 
-    .art.is-swapping {
-      opacity: 0.8;
-      transform: scale(1.02);
-    }
-
     .wallpaper img.is-swapping {
       opacity: 0.88;
-      transform: scale(1.14);
     }
 
     .text {
       width: 440px;
-      height: 440px;
+      min-height: 440px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding-top: 10%;
-      padding-bottom: 10%;
       align-items: flex-start;
+      position: relative;
+      padding-top: 0;
     }
 
     .top-block {
@@ -195,76 +243,24 @@
       gap: 10px;
       align-items: flex-start;
       width: 100%;
+      padding-top: 34px;
     }
 
-    .r2 {
-      font-size: 72px;
-      font-weight: 800;
-      letter-spacing: -0.05em;
-      line-height: 0.92;
-      color: var(--text);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-    }
-
-    .track-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .top-line-wrap {
       width: 100%;
-      max-width: 440px;
-    }
-
-    .artist,
-    .title {
-      transition:
-        opacity 240ms ease,
-        transform 240ms ease,
-        color 240ms ease;
-    }
-
-    .track-meta.bump .artist,
-    .track-meta.bump .title {
-      animation: metaSwap 520ms ease;
-    }
-
-    @keyframes metaSwap {
-      0%   { opacity: 0.58; transform: translateY(4px); }
-      45%  { opacity: 1; transform: translateY(0); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .artist {
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--text-soft);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-    }
-
-    .title {
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
-      overflow-wrap: anywhere;
+      max-width: 360px;
+      height: 10px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
     }
 
     .now-playing-line {
       width: 100%;
-      max-width: 314px;
       height: 2px;
       border-radius: 999px;
       background: rgba(255,255,255,0.10);
       overflow: hidden;
-      margin-top: 8px;
       position: relative;
     }
 
@@ -297,6 +293,124 @@
       box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.28);
       transform: translateX(0);
       will-change: transform;
+      transition: background 700ms ease, box-shadow 700ms ease;
+    }
+
+    .r2 {
+      font-size: 72px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.92;
+      color: var(--text);
+      margin-top: 0;
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .track-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-width: 360px;
+      margin-top: 2px;
+    }
+
+    .artist,
+    .title {
+      transition:
+        opacity 240ms ease,
+        transform 240ms ease,
+        color 240ms ease;
+    }
+
+    .track-meta.bump .artist,
+    .track-meta.bump .title {
+      animation: metaSwap 520ms ease;
+    }
+
+    @keyframes metaSwap {
+      0%   { opacity: 0.58; transform: translateY(4px); }
+      45%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .artist {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .title-wrap {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      white-space: nowrap;
+      display: inline-block;
+      min-width: 100%;
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+      position: relative;
+    }
+
+    .title.shimmer {
+      animation: titleShimmer 900ms ease;
+    }
+
+    .title.marquee {
+      animation: titleMarquee 14s linear infinite alternate;
+    }
+
+    @keyframes titleShimmer {
+      0% {
+        opacity: 0.72;
+        text-shadow:
+          0 0 0 rgba(255,255,255,0),
+          0 3px 18px var(--shadow-strong),
+          0 1px 2px var(--shadow-soft);
+      }
+      35% {
+        opacity: 1;
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.35),
+          0 3px 18px var(--shadow-strong),
+          0 1px 2px var(--shadow-soft);
+      }
+      100% {
+        opacity: 1;
+        text-shadow:
+          0 3px 18px var(--shadow-strong),
+          0 1px 2px var(--shadow-soft);
+      }
+    }
+
+    @keyframes titleMarquee {
+      0% {
+        transform: translateX(0);
+      }
+      15% {
+        transform: translateX(0);
+      }
+      85% {
+        transform: translateX(var(--title-shift, 0px));
+      }
+      100% {
+        transform: translateX(var(--title-shift, 0px));
+      }
     }
 
     .bottom-block {
@@ -352,8 +466,8 @@
       -webkit-backdrop-filter: blur(10px);
       transition:
         transform 180ms ease,
-        box-shadow 220ms ease,
-        background 220ms ease;
+        box-shadow 700ms ease,
+        background 700ms ease;
       overflow: visible;
     }
 
@@ -376,11 +490,27 @@
 
     .big-play-btn.is-playing {
       background: rgba(var(--accent-rgb), 0.24);
+      animation: playingButtonBreath 2.8s ease-in-out infinite;
+    }
+
+    @keyframes playingButtonBreath {
+      0%, 100% {
+        box-shadow:
+          0 10px 30px rgba(0,0,0,0.28),
+          inset 0 0 0 1px rgba(255,255,255,0.08),
+          0 0 24px rgba(var(--accent-rgb), 0.16);
+      }
+      50% {
+        box-shadow:
+          0 14px 36px rgba(0,0,0,0.32),
+          inset 0 0 0 1px rgba(255,255,255,0.10),
+          0 0 44px rgba(var(--accent-rgb), 0.30);
+      }
     }
 
     .big-play-icon {
       position: relative;
-      z-index: 3;
+      z-index: 4;
       font-size: 34px;
       line-height: 1;
       width: 34px;
@@ -389,6 +519,7 @@
       text-shadow:
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
+      transition: color 700ms ease;
     }
 
     .pulse-ring {
@@ -397,17 +528,19 @@
       border-radius: 999px;
       border: 2px solid rgba(var(--accent-rgb), 0.35);
       z-index: 1;
-      animation: pulseRing 2.2s infinite ease-out;
+      animation: none;
+      opacity: 0;
       pointer-events: none;
+      transition: border-color 700ms ease;
     }
 
     .pulse-ring-delay {
       animation-delay: 1.1s;
     }
 
-    .big-play-btn:not(.is-playing) .pulse-ring {
-      animation-duration: 2.8s;
-      opacity: 0.65;
+    .big-play-btn.is-playing .pulse-ring {
+      animation: pulseRing 2.2s infinite ease-out;
+      opacity: 1;
     }
 
     @keyframes pulseRing {
@@ -425,32 +558,81 @@
       }
     }
 
-    .volume-wrap {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .halo-ring {
+      position: absolute;
+      inset: -14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(var(--accent-rgb), 0.30);
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.9;
+      transform: rotate(0deg);
+      transition: border-color 700ms ease;
     }
 
-    .volume-label {
-      font-size: 13px;
-      font-weight: 700;
+    .big-play-btn.is-playing .halo-ring {
+      animation: haloSpin 7s linear infinite;
+    }
+
+    .halo-ring.boost {
+      animation: haloBoost 650ms cubic-bezier(.22,.61,.36,1) !important;
+    }
+
+    @keyframes haloSpin {
+      0% {
+        transform: rotate(0deg);
+        opacity: 0.52;
+      }
+      50% {
+        opacity: 0.95;
+      }
+      100% {
+        transform: rotate(360deg);
+        opacity: 0.52;
+      }
+    }
+
+    @keyframes haloBoost {
+      0% {
+        transform: rotate(0deg) scale(0.98);
+        opacity: 0.45;
+      }
+      50% {
+        transform: rotate(220deg) scale(1.06);
+        opacity: 1;
+      }
+      100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.7;
+      }
+    }
+
+    .volume-wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .volume-icon {
+      width: 18px;
+      height: 18px;
       color: var(--text-soft);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      text-shadow:
-        0 3px 18px var(--shadow-strong),
-        0 1px 2px var(--shadow-soft);
+      filter:
+        drop-shadow(0 3px 18px var(--shadow-strong))
+        drop-shadow(0 1px 2px var(--shadow-soft));
     }
 
     .volume-slider {
       width: 100%;
       appearance: none;
-      height: 8px;
+      height: var(--volume-thickness);
       border-radius: 999px;
       background: rgba(255,255,255,0.12);
       outline: none;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      transition: height 160ms ease;
     }
 
     .volume-slider::-webkit-slider-thumb {
@@ -462,6 +644,7 @@
       background: var(--accent);
       box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18);
       cursor: pointer;
+      transition: background 700ms ease, box-shadow 700ms ease;
     }
 
     .volume-slider::-moz-range-thumb {
@@ -472,6 +655,7 @@
       background: var(--accent);
       box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18);
       cursor: pointer;
+      transition: background 700ms ease, box-shadow 700ms ease;
     }
 
     .player-shell {
@@ -489,12 +673,36 @@
 
     .player-status {
       margin-top: 8px;
+      min-height: 1.2em;
       font-size: 13px;
       color: var(--text-soft);
       text-shadow:
         0 3px 18px var(--shadow-strong),
         0 1px 2px var(--shadow-soft);
       text-align: center;
+    }
+
+    .corner-logo {
+      position: fixed;
+      right: clamp(16px, 3vw, 28px);
+      bottom: clamp(16px, 3vw, 28px);
+      z-index: 2;
+      opacity: 0.92;
+      pointer-events: none;
+    }
+
+    .corner-logo img {
+      display: block;
+      max-width: min(220px, 18vw);
+      max-height: 72px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transform: scale(0.6);
+      transform-origin: bottom right;
+      filter:
+        drop-shadow(0 8px 22px rgba(0,0,0,0.35))
+        drop-shadow(0 2px 6px rgba(0,0,0,0.18));
     }
 
     .shaka-controls-container {
@@ -513,15 +721,20 @@
       font-size: 13px;
     }
 
-    @media (max-width: 700px) {
+    @media (hover: none) and (pointer: coarse) {
+      .volume-wrap {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
       body {
         overflow: auto;
       }
 
       .app {
-        height: auto;
         min-height: 100vh;
-        padding: 30px 20px;
+        padding: 30px 20px 88px;
       }
 
       .container {
@@ -545,13 +758,26 @@
         align-items: center;
       }
 
+      .track-meta {
+        max-width: 100%;
+      }
+
+      .top-line-wrap {
+        max-width: 100%;
+        justify-content: center;
+      }
+
       .now-playing-line {
-        margin-left: auto;
-        margin-right: auto;
+        max-width: 100%;
       }
 
       .player-host {
         max-width: 100%;
+      }
+
+      .corner-logo img {
+        max-width: 160px;
+        max-height: 56px;
       }
     }
   </style>
@@ -566,17 +792,23 @@
     <div class="container">
       <div class="art-wrap">
         <img id="art" class="art" src="/images/r2.png" alt="R2 artwork" crossorigin="anonymous">
+        <div id="artSweep" class="art-sweep" aria-hidden="true"></div>
       </div>
 
       <div class="text">
         <div class="top-block">
+          <div class="top-line-wrap" aria-hidden="true">
+            <div class="now-playing-line">
+              <div id="nowPlayingFill" class="now-playing-line-fill"></div>
+            </div>
+          </div>
+
           <div class="r2">R2</div>
 
           <div id="trackMeta" class="track-meta">
             <div id="artist" class="artist">Raadio 2</div>
-            <div id="title" class="title">Laadimine...</div>
-            <div class="now-playing-line" aria-hidden="true">
-              <div id="nowPlayingFill" class="now-playing-line-fill"></div>
+            <div class="title-wrap">
+              <div id="title" class="title">Laadimine...</div>
             </div>
           </div>
         </div>
@@ -588,12 +820,16 @@
                 <button id="bigPlayBtn" class="big-play-btn" type="button" aria-label="Käivita või peata striim">
                   <span class="pulse-ring"></span>
                   <span class="pulse-ring pulse-ring-delay"></span>
-                  <span id="bigPlayIcon" class="big-play-icon">▶</span>
+                  <span id="haloRing" class="halo-ring"></span>
+                  <span id="bigPlayIcon" class="big-play-icon">▷</span>
                 </button>
               </div>
 
-              <div class="volume-wrap">
-                <label for="volumeSlider" class="volume-label">Heli</label>
+              <div id="volumeWrap" class="volume-wrap">
+                <svg class="volume-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M14 5.23v13.54a1 1 0 0 1-1.64.77L7.91 16H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.91l4.45-3.54A1 1 0 0 1 14 5.23Zm3.54 2.05a1 1 0 0 1 1.41 0 6.5 6.5 0 0 1 0 9.19 1 1 0 1 1-1.41-1.42 4.5 4.5 0 0 0 0-6.35 1 1 0 0 1 0-1.42Zm-2.83 2.82a1 1 0 0 1 1.41 0 2.5 2.5 0 0 1 0 3.54 1 1 0 1 1-1.41-1.42.5.5 0 0 0 0-.7 1 1 0 0 1 0-1.42Z"/>
+                </svg>
+
                 <input
                   id="volumeSlider"
                   class="volume-slider"
@@ -608,11 +844,15 @@
             </div>
 
             <div id="playerContainer" class="player-shell is-hidden"></div>
-            <div id="playerStatus" class="player-status">Laen mängijat...</div>
+            <div id="playerStatus" class="player-status"></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="corner-logo" aria-hidden="true">
+    <img src="/images/R2_light_logo.png" alt="">
   </div>
 
   <script>
@@ -621,15 +861,18 @@
 
     const artEl = document.getElementById("art");
     const bgEl = document.getElementById("bg");
+    const artSweepEl = document.getElementById("artSweep");
     const trackMetaEl = document.getElementById("trackMeta");
     const artistEl = document.getElementById("artist");
     const titleEl = document.getElementById("title");
+    const haloRingEl = document.getElementById("haloRing");
     const nowPlayingFillEl = document.getElementById("nowPlayingFill");
     const playerContainerEl = document.getElementById("playerContainer");
     const playerStatusEl = document.getElementById("playerStatus");
     const bigPlayBtn = document.getElementById("bigPlayBtn");
     const bigPlayIcon = document.getElementById("bigPlayIcon");
     const volumeSlider = document.getElementById("volumeSlider");
+    const volumeWrap = document.getElementById("volumeWrap");
 
     let currentArtwork = null;
     let currentTrackKey = "";
@@ -642,92 +885,327 @@
     let shakaControls = null;
     let mediaEl = null;
 
-    function setPlayerStatus(text) {
+    let currentTheme = {
+      accent: { r: 88, g: 166, b: 255 },
+      glowAlpha: 0.12
+    };
+
+    function isMobileLikeDevice() {
+      return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    }
+
+    function setPlayerStatus(text = "") {
       playerStatusEl.textContent = text;
-      console.log("[player]", text);
+      if (text) console.log("[player]", text);
+    }
+
+    function updateMediaSessionState() {
+      if (!("mediaSession" in navigator) || !mediaEl) return;
+      navigator.mediaSession.playbackState = mediaEl.paused ? "paused" : "playing";
     }
 
     function updateBigPlayState() {
       if (!mediaEl) return;
       const isPlaying = !mediaEl.paused;
       bigPlayBtn.classList.toggle("is-playing", isPlaying);
-      bigPlayIcon.textContent = isPlaying ? "❚❚" : "▶";
+      bigPlayIcon.textContent = isPlaying ? "Ⅱ" : "▷";
+      updateMediaSessionState();
     }
 
-    function setTheme({ text, textSoft, accent, accentRgb, shadowStrong, shadowSoft, glow }) {
+    function boostHalo() {
+      haloRingEl.classList.remove("boost");
+      void haloRingEl.offsetWidth;
+      haloRingEl.classList.add("boost");
+    }
+
+    function runArtSweep() {
+      artSweepEl.classList.remove("run");
+      void artSweepEl.offsetWidth;
+      artSweepEl.classList.add("run");
+    }
+
+    function updateVolumeThickness() {
+      const value = Number(volumeSlider.value || 0);
+      const min = 4;
+      const max = 12;
+      const thickness = min + (max - min) * value;
+      document.documentElement.style.setProperty("--volume-thickness", thickness.toFixed(2) + "px");
+    }
+
+    function setThemeVars(theme) {
       const root = document.documentElement;
-      root.style.setProperty("--text", text);
-      root.style.setProperty("--text-soft", textSoft);
-      root.style.setProperty("--accent", accent);
-      root.style.setProperty("--accent-rgb", accentRgb);
-      root.style.setProperty("--shadow-strong", shadowStrong);
-      root.style.setProperty("--shadow-soft", shadowSoft);
-      root.style.setProperty("--glow", glow);
+      root.style.setProperty("--text", "#ffffff");
+      root.style.setProperty("--text-soft", "rgba(255,255,255,0.72)");
+      root.style.setProperty("--accent", `rgb(${theme.accent.r}, ${theme.accent.g}, ${theme.accent.b})`);
+      root.style.setProperty("--accent-rgb", `${theme.accent.r}, ${theme.accent.g}, ${theme.accent.b}`);
+      root.style.setProperty("--shadow-strong", "rgba(0,0,0,0.46)");
+      root.style.setProperty("--shadow-soft", "rgba(0,0,0,0.22)");
+      root.style.setProperty("--glow", `rgba(${theme.accent.r}, ${theme.accent.g}, ${theme.accent.b}, ${theme.glowAlpha})`);
+    }
+
+    function animateThemeTo(target, duration = 750) {
+      const start = {
+        accent: { ...currentTheme.accent },
+        glowAlpha: currentTheme.glowAlpha
+      };
+
+      const startTime = performance.now();
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function step(now) {
+        const p = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+
+        const next = {
+          accent: {
+            r: Math.round(lerp(start.accent.r, target.accent.r, eased)),
+            g: Math.round(lerp(start.accent.g, target.accent.g, eased)),
+            b: Math.round(lerp(start.accent.b, target.accent.b, eased))
+          },
+          glowAlpha: lerp(start.glowAlpha, target.glowAlpha, eased)
+        };
+
+        setThemeVars(next);
+
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          currentTheme = {
+            accent: { ...target.accent },
+            glowAlpha: target.glowAlpha
+          };
+          setThemeVars(currentTheme);
+        }
+      }
+
+      requestAnimationFrame(step);
     }
 
     function applyNewsTheme() {
-      setTheme({
-        text: "#ffffff",
-        textSoft: "rgba(255,255,255,0.78)",
-        accent: "#ff3b30",
-        accentRgb: "255, 59, 48",
-        shadowStrong: "rgba(0,0,0,0.46)",
-        shadowSoft: "rgba(0,0,0,0.22)",
-        glow: "rgba(255,59,48,0.14)"
+      animateThemeTo({
+        accent: { r: 255, g: 59, b: 48 },
+        glowAlpha: 0.14
       });
     }
 
-    function pickTheme(r, g, b) {
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      const isLight = luminance > 0.68;
-
-      if (isLight) {
-        return {
-          text: "#111111",
-          textSoft: "rgba(17,17,17,0.76)",
-          accent: "#111111",
-          accentRgb: "17, 17, 17",
-          shadowStrong: "rgba(255,255,255,0.16)",
-          shadowSoft: "rgba(255,255,255,0.08)",
-          glow: "rgba(255,255,255,0.08)"
-        };
-      }
+    function rgbToHsl(r, g, b) {
+      r /= 255;
+      g /= 255;
+      b /= 255;
 
       const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s;
+      const l = (max + min) / 2;
 
-      if (max === r) {
-        return {
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#ff5a6b",
-          accentRgb: "255, 90, 107",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)",
-          glow: "rgba(255,90,107,0.14)"
-        };
-      }
+      if (max === min) {
+        h = 0;
+        s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
-      if (max === g) {
-        return {
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#42d66f",
-          accentRgb: "66, 214, 111",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)",
-          glow: "rgba(66,214,111,0.14)"
-        };
+        switch (max) {
+          case r:
+            h = (g - b) / d + (g < b ? 6 : 0);
+            break;
+          case g:
+            h = (b - r) / d + 2;
+            break;
+          default:
+            h = (r - g) / d + 4;
+            break;
+        }
+
+        h /= 6;
       }
 
       return {
-        text: "#ffffff",
-        textSoft: "rgba(255,255,255,0.72)",
-        accent: "#58a6ff",
-        accentRgb: "88, 166, 255",
-        shadowStrong: "rgba(0,0,0,0.46)",
-        shadowSoft: "rgba(0,0,0,0.22)",
-        glow: "rgba(88,166,255,0.12)"
+        h: h * 360,
+        s: s * 100,
+        l: l * 100
       };
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360;
+      s /= 100;
+      l /= 100;
+
+      let r, g, b;
+
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+
+      return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+      };
+    }
+
+    function refineAccentColor(rgb) {
+      let { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+      s = Math.min(s, 78);
+
+      if (l < 42) l = 42;
+      if (l > 62) l = 62;
+
+      if (h >= 45 && h <= 75) {
+        h = 40;
+        s = Math.min(s, 58);
+        l = Math.min(Math.max(l, 48), 58);
+      }
+
+      if (h > 75 && h <= 105) {
+        h = 145;
+        s = Math.min(s, 52);
+        l = Math.min(Math.max(l, 42), 52);
+      }
+
+      if (h > 105 && h <= 145) {
+        s = Math.min(s, 58);
+        l = Math.min(Math.max(l, 40), 50);
+      }
+
+      if (h > 145 && h <= 240) {
+        s = Math.min(s, 72);
+        l = Math.min(Math.max(l, 46), 58);
+      }
+
+      if (h >= 330 || h <= 20) {
+        s = Math.min(s, 68);
+        l = Math.min(Math.max(l, 44), 56);
+      }
+
+      if (h > 240 && h < 330) {
+        s = Math.min(s, 62);
+        l = Math.min(Math.max(l, 46), 58);
+      }
+
+      return hslToRgb(h, s, l);
+    }
+
+    function getAccentColorFromPixels(data) {
+      const buckets = {};
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+
+        if (a < 120) continue;
+
+        const brightness = (r + g + b) / 3;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max - min;
+
+        if (brightness < 38 || brightness > 224) continue;
+        if (saturation < 26) continue;
+
+        const rr = Math.max(0, Math.min(255, Math.round(r / 32) * 32));
+        const gg = Math.max(0, Math.min(255, Math.round(g / 32) * 32));
+        const bb = Math.max(0, Math.min(255, Math.round(b / 32) * 32));
+        const key = `${rr}_${gg}_${bb}`;
+
+        if (!buckets[key]) {
+          buckets[key] = {
+            count: 0,
+            saturation: 0,
+            brightness: 0
+          };
+        }
+
+        buckets[key].count += 1;
+        buckets[key].saturation += saturation;
+        buckets[key].brightness += brightness;
+      }
+
+      let best = null;
+      let bestScore = -Infinity;
+
+      for (const key in buckets) {
+        const bucket = buckets[key];
+        const avgSat = bucket.saturation / bucket.count;
+        const avgBrightness = bucket.brightness / bucket.count;
+        const [r, g, b] = key.split("_").map(Number);
+        const { h } = rgbToHsl(r, g, b);
+
+        let huePenalty = 1;
+
+        if (h >= 45 && h <= 105) {
+          huePenalty = 0.62;
+        }
+
+        if (avgSat < 34) {
+          huePenalty *= 0.8;
+        }
+
+        const score = bucket.count * avgSat * huePenalty * (avgBrightness / 140);
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = { r, g, b };
+        }
+      }
+
+      if (!best) return null;
+      return refineAccentColor(best);
+    }
+
+    function getFallbackAccent() {
+      return { r: 88, g: 166, b: 255 };
+    }
+
+    function blendRgb(a, b, t) {
+      return {
+        r: Math.round(a.r + (b.r - a.r) * t),
+        g: Math.round(a.g + (b.g - a.g) * t),
+        b: Math.round(a.b + (b.b - a.b) * t)
+      };
+    }
+
+    function shimmerTitle() {
+      titleEl.classList.remove("shimmer");
+      void titleEl.offsetWidth;
+      titleEl.classList.add("shimmer");
+    }
+
+    function updateTitleMarquee() {
+      titleEl.classList.remove("marquee");
+      titleEl.style.removeProperty("--title-shift");
+
+      const wrap = titleEl.parentElement;
+      if (!wrap) return;
+
+      const overflow = titleEl.scrollWidth - wrap.clientWidth;
+      if (overflow > 18) {
+        titleEl.style.setProperty("--title-shift", `${-overflow}px`);
+        titleEl.classList.add("marquee");
+      }
     }
 
     function bumpNowPlaying() {
@@ -736,6 +1214,9 @@
       void artEl.offsetWidth;
       artEl.classList.add("bump");
       trackMetaEl.classList.add("bump");
+      shimmerTitle();
+      boostHalo();
+      runArtSweep();
     }
 
     async function preloadImage(src) {
@@ -752,41 +1233,25 @@
       try {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        const w = 24;
-        const h = 24;
+        const w = 32;
+        const h = 32;
 
         canvas.width = w;
         canvas.height = h;
         ctx.drawImage(img, 0, 0, w, h);
 
         const { data } = ctx.getImageData(0, 0, w, h);
-        let r = 0, g = 0, b = 0, count = 0;
+        const extracted = getAccentColorFromPixels(data) || getFallbackAccent();
+        const smoothedAccent = blendRgb(currentTheme.accent, extracted, 0.72);
 
-        for (let i = 0; i < data.length; i += 4) {
-          const alpha = data[i + 3];
-          if (alpha < 120) continue;
-          r += data[i];
-          g += data[i + 1];
-          b += data[i + 2];
-          count++;
-        }
-
-        if (!count) throw new Error("No readable pixels");
-
-        setTheme(pickTheme(
-          Math.round(r / count),
-          Math.round(g / count),
-          Math.round(b / count)
-        ));
+        animateThemeTo({
+          accent: smoothedAccent,
+          glowAlpha: 0.14
+        });
       } catch {
-        setTheme({
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#58a6ff",
-          accentRgb: "88, 166, 255",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)",
-          glow: "rgba(88,166,255,0.12)"
+        animateThemeTo({
+          accent: getFallbackAccent(),
+          glowAlpha: 0.12
         });
       }
     }
@@ -811,14 +1276,9 @@
         artEl.src = src;
         bgEl.src = src;
 
-        setTheme({
-          text: "#ffffff",
-          textSoft: "rgba(255,255,255,0.72)",
-          accent: "#58a6ff",
-          accentRgb: "88, 166, 255",
-          shadowStrong: "rgba(0,0,0,0.46)",
-          shadowSoft: "rgba(0,0,0,0.22)",
-          glow: "rgba(88,166,255,0.12)"
+        animateThemeTo({
+          accent: getFallbackAccent(),
+          glowAlpha: 0.12
         });
       }
 
@@ -850,11 +1310,67 @@
       };
     }
 
+    function updateMediaSession(track, artwork) {
+      if (!("mediaSession" in navigator)) return;
+
+      const artSrc = artwork || FALLBACK;
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title || "R2",
+        artist: track.artist || "Raadio 2",
+        album: "Raadio 2",
+        artwork: [
+          { src: artSrc, sizes: "96x96", type: "image/png" },
+          { src: artSrc, sizes: "128x128", type: "image/png" },
+          { src: artSrc, sizes: "192x192", type: "image/png" },
+          { src: artSrc, sizes: "256x256", type: "image/png" },
+          { src: artSrc, sizes: "384x384", type: "image/png" },
+          { src: artSrc, sizes: "512x512", type: "image/png" }
+        ]
+      });
+
+      try {
+        navigator.mediaSession.setActionHandler("play", async () => {
+          if (mediaEl?.paused) {
+            await mediaEl.play();
+            updateBigPlayState();
+          }
+        });
+
+        navigator.mediaSession.setActionHandler("pause", () => {
+          if (mediaEl && !mediaEl.paused) {
+            mediaEl.pause();
+            updateBigPlayState();
+          }
+        });
+
+        navigator.mediaSession.setActionHandler("stop", () => {
+          if (mediaEl) {
+            mediaEl.pause();
+            updateBigPlayState();
+          }
+        });
+      } catch (err) {
+        console.log("Media Session handler error", err);
+      }
+    }
+
     function startBackgroundPulse() {
       function tick() {
         const t = performance.now() / 1000;
-        const brightness = 0.78 + (Math.sin(t * 0.10) * 0.016) + (Math.sin(t * 0.035) * 0.008);
+        const brightness =
+          0.78 +
+          (Math.sin(t * 0.10) * 0.016) +
+          (Math.sin(t * 0.035) * 0.008);
+
+        const scale =
+          1.125 +
+          (Math.sin(t * 0.055) * 0.012) +
+          (Math.sin(t * 0.021) * 0.006);
+
         document.documentElement.style.setProperty("--bg-brightness", brightness.toFixed(3));
+        document.documentElement.style.setProperty("--wallpaper-scale", scale.toFixed(4));
+
         requestAnimationFrame(tick);
       }
 
@@ -876,7 +1392,7 @@
     }
 
     function startProgressLineMotion() {
-      const duration = 30000;
+      const duration = 5000;
       const minPos = -6;
       const maxPos = 178;
 
@@ -964,12 +1480,12 @@
         });
 
         mediaEl.addEventListener("play", () => {
-          setPlayerStatus("Mängib.");
+          setPlayerStatus("");
           updateBigPlayState();
         });
 
         mediaEl.addEventListener("pause", () => {
-          setPlayerStatus("Peatatud.");
+          setPlayerStatus("");
           updateBigPlayState();
         });
 
@@ -978,7 +1494,7 @@
         });
 
         mediaEl.addEventListener("loadeddata", () => {
-          setPlayerStatus("Valmis.");
+          setPlayerStatus("");
           updateBigPlayState();
         });
 
@@ -987,11 +1503,11 @@
           updateBigPlayState();
         });
 
-        setPlayerStatus("Laen striimi...");
         await shakaPlayer.load(HLS_STREAM);
         mediaEl.volume = Number(volumeSlider.value || 1);
+        updateVolumeThickness();
         updateBigPlayState();
-        setPlayerStatus("Valmis. Vajuta Play.");
+        setPlayerStatus("");
       } catch (error) {
         console.error("initPlayer error:", error);
         setPlayerStatus("Mängija käivitamine ebaõnnestus.");
@@ -1019,6 +1535,7 @@
     volumeSlider.addEventListener("input", () => {
       if (!mediaEl) return;
       mediaEl.volume = Number(volumeSlider.value);
+      updateVolumeThickness();
     });
 
     async function update() {
@@ -1039,11 +1556,13 @@
 
         artistEl.textContent = track.artist;
         titleEl.textContent = track.title;
+        updateTitleMarquee();
 
         const isNews = track.title === "Uudised" || track.artist === "Uudised";
         const artworkToUse = isNews ? FALLBACK : (data.artwork || FALLBACK);
 
         await updateArtwork(artworkToUse);
+        updateMediaSession(track, artworkToUse);
 
         if (isNews) {
           applyNewsTheme();
@@ -1058,6 +1577,14 @@
       }
     }
 
+    if (isMobileLikeDevice() && volumeWrap) {
+      volumeWrap.style.display = "none";
+    }
+
+    window.addEventListener("resize", updateTitleMarquee);
+
+    setThemeVars(currentTheme);
+    updateVolumeThickness();
     startBackgroundPulse();
     startProgressLineMotion();
     resetProgressLine();
