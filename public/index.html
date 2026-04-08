@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>R2</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.9.9/controls.min.css"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.9.9/shaka-player.ui.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --text: #ffffff;
+      --text-soft: rgba(255,255,255,0.72);
+      --accent: #58a6ff;
+      --accent-rgb: 88, 166, 255;
+      --shadow-strong: rgba(0,0,0,0.42);
+      --shadow-soft: rgba(0,0,0,0.22);
+      --glow: rgba(88,166,255,0.12);
+      --bg-brightness: 0.78;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family:
+        "SF Pro Display",
+        "SF Pro Text",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+      color: var(--text);
+      background: #000;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wallpaper {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .wallpaper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(22px) brightness(var(--bg-brightness)) saturate(1.04) contrast(1.03);
+      transform: scale(1.12);
+      transition:
+        opacity 700ms ease,
+        transform 900ms cubic-bezier(.22,.61,.36,1),
+        filter 1000ms ease;
+      will-change: transform, opacity, filter;
+    }
+
+    .wallpaper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0.02) 0%,
+          rgba(0,0,0,0.08) 38%,
+          rgba(0,0,0,0.18) 100%
+        );
+    }
+
+    .wallpaper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 35% 50%, var(--glow) 0%, transparent 38%),
+        radial-gradient(circle at 70% 52%, rgba(var(--accent-rgb), 0.06) 0%, transparent 32%);
+      opacity: 1;
+      transition: background 500ms ease, opacity 300ms ease;
+      pointer-events: none;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .container {
+      width: 960px;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: 440px 440px;
+      gap: 80px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .art-wrap {
+      width: 440px;
+      height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .art-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border-radius: 34px;
+      background: radial-gradient(circle at center, var(--glow) 0%, transparent 65%);
+      filter: blur(20px);
+      opacity: 0.9;
+      transition: background 400ms ease, opacity 300ms ease;
+      pointer-events: none;
+    }
+
+    .art {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.46),
+        0 0 0 1px rgba(255,255,255,0.05),
+        0 0 24px rgba(var(--accent-rgb), 0.12);
+      background: rgba(255,255,255,0.06);
+      transition:
+        opacity 620ms ease,
+        transform 900ms cubic-bezier(.22,.61,.36,1),
+        box-shadow 500ms ease;
+      transform: scale(1);
+      will-change: transform, opacity;
+    }
+
+    .art.bump {
+      animation: artBump 650ms cubic-bezier(.22,.61,.36,1);
+    }
+
+    @keyframes artBump {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.028); }
+      100% { transform: scale(1); }
+    }
+
+    .art.is-swapping {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+
+    .wallpaper img.is-swapping {
+      opacity: 0.88;
+      transform: scale(1.14);
+    }
+
+    .text {
+      width: 440px;
+      height: 440px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: 10%;
+      padding-bottom: 10%;
+      align-items: flex-start;
+    }
+
+    .top-block {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .r2 {
+      font-size: 72px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.92;
+      color: var(--text);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .track-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .artist,
+    .title {
+      transition:
+        opacity 240ms ease,
+        transform 240ms ease,
+        color 240ms ease;
+    }
+
+    .track-meta.bump .artist,
+    .track-meta.bump .title {
+      animation: metaSwap 520ms ease;
+    }
+
+    @keyframes metaSwap {
+      0%   { opacity: 0.58; transform: translateY(4px); }
+      45%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .artist {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+      overflow-wrap: anywhere;
+    }
+
+    .now-playing-line {
+      width: 100%;
+      max-width: 314px;
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .now-playing-line::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.02) 0%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.02) 100%
+      );
+    }
+
+    .now-playing-line-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 36%;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        rgba(var(--accent-rgb), 0.18) 0%,
+        rgba(var(--accent-rgb), 0.95) 55%,
+        rgba(var(--accent-rgb), 0.18) 100%
+      );
+      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.28);
+      transform: translateX(0);
+      will-change: transform;
+    }
+
+    .bottom-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .player-host {
+      width: 100%;
+      max-width: 360px;
+      position: relative;
+    }
+
+    .custom-player {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .player-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .big-play-btn {
+      appearance: none;
+      border: none;
+      width: 92px;
+      height: 92px;
+      min-width: 92px;
+      min-height: 92px;
+      border-radius: 999px;
+      padding: 0;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: rgba(var(--accent-rgb), 0.16);
+      color: var(--text);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.28),
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        0 0 30px rgba(var(--accent-rgb), 0.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition:
+        transform 180ms ease,
+        box-shadow 220ms ease,
+        background 220ms ease;
+      overflow: visible;
+    }
+
+    .big-play-btn:hover {
+      transform: scale(1.03);
+      box-shadow:
+        0 16px 36px rgba(0,0,0,0.32),
+        inset 0 0 0 1px rgba(255,255,255,0.10),
+        0 0 40px rgba(var(--accent-rgb), 0.24);
+    }
+
+    .big-play-btn:active {
+      transform: scale(0.98);
+    }
+
+    .big-play-btn:focus-visible {
+      outline: 3px solid rgba(255,255,255,0.72);
+      outline-offset: 8px;
+    }
+
+    .big-play-btn.is-playing {
+      background: rgba(var(--accent-rgb), 0.24);
+    }
+
+    .big-play-icon {
+      position: relative;
+      z-index: 3;
+      font-size: 34px;
+      line-height: 1;
+      width: 34px;
+      text-align: center;
+      color: var(--accent);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .pulse-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 999px;
+      border: 2px solid rgba(var(--accent-rgb), 0.35);
+      z-index: 1;
+      animation: pulseRing 2.2s infinite ease-out;
+      pointer-events: none;
+    }
+
+    .pulse-ring-delay {
+      animation-delay: 1.1s;
+    }
+
+    .big-play-btn:not(.is-playing) .pulse-ring {
+      animation-duration: 2.8s;
+      opacity: 0.65;
+    }
+
+    @keyframes pulseRing {
+      0% {
+        transform: scale(0.92);
+        opacity: 0.75;
+      }
+      70% {
+        transform: scale(1.22);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1.22);
+        opacity: 0;
+      }
+    }
+
+    .volume-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .volume-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+    }
+
+    .volume-slider {
+      width: 100%;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18);
+      cursor: pointer;
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.18);
+      cursor: pointer;
+    }
+
+    .player-shell {
+      width: 100%;
+    }
+
+    .player-shell.is-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .player-status {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-soft);
+      text-shadow:
+        0 3px 18px var(--shadow-strong),
+        0 1px 2px var(--shadow-soft);
+      text-align: center;
+    }
+
+    .shaka-controls-container {
+      background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.68) 100%);
+    }
+
+    .shaka-bottom-controls {
+      padding: 10px 12px 12px;
+    }
+
+    .shaka-current-time,
+    .shaka-time-and-duration,
+    .shaka-overflow-button-label,
+    .shaka-overflow-menu span,
+    .shaka-status-text-container {
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100vh;
+        padding: 30px 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 440px;
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+
+      .art-wrap,
+      .text {
+        width: 100%;
+        height: auto;
+      }
+
+      .text,
+      .top-block,
+      .bottom-block,
+      .track-meta {
+        align-items: center;
+      }
+
+      .now-playing-line {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .player-host {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wallpaper">
+    <img id="bg" src="/images/r2.png" alt="">
+  </div>
+
+  <div class="app">
+    <div class="container">
+      <div class="art-wrap">
+        <img id="art" class="art" src="/images/r2.png" alt="R2 artwork" crossorigin="anonymous">
+      </div>
+
+      <div class="text">
+        <div class="top-block">
+          <div class="r2">R2</div>
+
+          <div id="trackMeta" class="track-meta">
+            <div id="artist" class="artist">Raadio 2</div>
+            <div id="title" class="title">Laadimine...</div>
+            <div class="now-playing-line" aria-hidden="true">
+              <div id="nowPlayingFill" class="now-playing-line-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-block">
+          <div class="player-host">
+            <div class="custom-player">
+              <div class="player-main-row">
+                <button id="bigPlayBtn" class="big-play-btn" type="button" aria-label="Käivita või peata striim">
+                  <span class="pulse-ring"></span>
+                  <span class="pulse-ring pulse-ring-delay"></span>
+                  <span id="bigPlayIcon" class="big-play-icon">▶</span>
+                </button>
+              </div>
+
+              <div class="volume-wrap">
+                <label for="volumeSlider" class="volume-label">Heli</label>
+                <input
+                  id="volumeSlider"
+                  class="volume-slider"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value="1"
+                  aria-label="Helitugevus"
+                />
+              </div>
+            </div>
+
+            <div id="playerContainer" class="player-shell is-hidden"></div>
+            <div id="playerStatus" class="player-status">Laen mängijat...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FALLBACK = "/images/r2.png";
+    const HLS_STREAM = "https://live.err.ee/live/raadio2.m3u8";
+
+    const artEl = document.getElementById("art");
+    const bgEl = document.getElementById("bg");
+    const trackMetaEl = document.getElementById("trackMeta");
+    const artistEl = document.getElementById("artist");
+    const titleEl = document.getElementById("title");
+    const nowPlayingFillEl = document.getElementById("nowPlayingFill");
+    const playerContainerEl = document.getElementById("playerContainer");
+    const playerStatusEl = document.getElementById("playerStatus");
+    const bigPlayBtn = document.getElementById("bigPlayBtn");
+    const bigPlayIcon = document.getElementById("bigPlayIcon");
+    const volumeSlider = document.getElementById("volumeSlider");
+
+    let currentArtwork = null;
+    let currentTrackKey = "";
+    let progressAnimFrame = null;
+    let progressDirection = 1;
+    let progressStartAt = performance.now();
+
+    let shakaPlayer = null;
+    let shakaUi = null;
+    let shakaControls = null;
+    let mediaEl = null;
+
+    function setPlayerStatus(text) {
+      playerStatusEl.textContent = text;
+      console.log("[player]", text);
+    }
+
+    function updateBigPlayState() {
+      if (!mediaEl) return;
+      const isPlaying = !mediaEl.paused;
+      bigPlayBtn.classList.toggle("is-playing", isPlaying);
+      bigPlayIcon.textContent = isPlaying ? "❚❚" : "▶";
+    }
+
+    function setTheme({ text, textSoft, accent, accentRgb, shadowStrong, shadowSoft, glow }) {
+      const root = document.documentElement;
+      root.style.setProperty("--text", text);
+      root.style.setProperty("--text-soft", textSoft);
+      root.style.setProperty("--accent", accent);
+      root.style.setProperty("--accent-rgb", accentRgb);
+      root.style.setProperty("--shadow-strong", shadowStrong);
+      root.style.setProperty("--shadow-soft", shadowSoft);
+      root.style.setProperty("--glow", glow);
+    }
+
+    function applyNewsTheme() {
+      setTheme({
+        text: "#ffffff",
+        textSoft: "rgba(255,255,255,0.78)",
+        accent: "#ff3b30",
+        accentRgb: "255, 59, 48",
+        shadowStrong: "rgba(0,0,0,0.46)",
+        shadowSoft: "rgba(0,0,0,0.22)",
+        glow: "rgba(255,59,48,0.14)"
+      });
+    }
+
+    function pickTheme(r, g, b) {
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const isLight = luminance > 0.68;
+
+      if (isLight) {
+        return {
+          text: "#111111",
+          textSoft: "rgba(17,17,17,0.76)",
+          accent: "#111111",
+          accentRgb: "17, 17, 17",
+          shadowStrong: "rgba(255,255,255,0.16)",
+          shadowSoft: "rgba(255,255,255,0.08)",
+          glow: "rgba(255,255,255,0.08)"
+        };
+      }
+
+      const max = Math.max(r, g, b);
+
+      if (max === r) {
+        return {
+          text: "#ffffff",
+          textSoft: "rgba(255,255,255,0.72)",
+          accent: "#ff5a6b",
+          accentRgb: "255, 90, 107",
+          shadowStrong: "rgba(0,0,0,0.46)",
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(255,90,107,0.14)"
+        };
+      }
+
+      if (max === g) {
+        return {
+          text: "#ffffff",
+          textSoft: "rgba(255,255,255,0.72)",
+          accent: "#42d66f",
+          accentRgb: "66, 214, 111",
+          shadowStrong: "rgba(0,0,0,0.46)",
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(66,214,111,0.14)"
+        };
+      }
+
+      return {
+        text: "#ffffff",
+        textSoft: "rgba(255,255,255,0.72)",
+        accent: "#58a6ff",
+        accentRgb: "88, 166, 255",
+        shadowStrong: "rgba(0,0,0,0.46)",
+        shadowSoft: "rgba(0,0,0,0.22)",
+        glow: "rgba(88,166,255,0.12)"
+      };
+    }
+
+    function bumpNowPlaying() {
+      artEl.classList.remove("bump");
+      trackMetaEl.classList.remove("bump");
+      void artEl.offsetWidth;
+      artEl.classList.add("bump");
+      trackMetaEl.classList.add("bump");
+    }
+
+    async function preloadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function applyThemeFromImage(img) {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const w = 24;
+        const h = 24;
+
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const { data } = ctx.getImageData(0, 0, w, h);
+        let r = 0, g = 0, b = 0, count = 0;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          if (alpha < 120) continue;
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+
+        if (!count) throw new Error("No readable pixels");
+
+        setTheme(pickTheme(
+          Math.round(r / count),
+          Math.round(g / count),
+          Math.round(b / count)
+        ));
+      } catch {
+        setTheme({
+          text: "#ffffff",
+          textSoft: "rgba(255,255,255,0.72)",
+          accent: "#58a6ff",
+          accentRgb: "88, 166, 255",
+          shadowStrong: "rgba(0,0,0,0.46)",
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(88,166,255,0.12)"
+        });
+      }
+    }
+
+    async function updateArtwork(artwork) {
+      const src = artwork || FALLBACK;
+      if (src === currentArtwork) return;
+
+      artEl.classList.add("is-swapping");
+      bgEl.classList.add("is-swapping");
+
+      try {
+        const img = await preloadImage(src);
+
+        currentArtwork = src;
+        artEl.src = src;
+        bgEl.src = src;
+
+        applyThemeFromImage(img);
+      } catch {
+        currentArtwork = src;
+        artEl.src = src;
+        bgEl.src = src;
+
+        setTheme({
+          text: "#ffffff",
+          textSoft: "rgba(255,255,255,0.72)",
+          accent: "#58a6ff",
+          accentRgb: "88, 166, 255",
+          shadowStrong: "rgba(0,0,0,0.46)",
+          shadowSoft: "rgba(0,0,0,0.22)",
+          glow: "rgba(88,166,255,0.12)"
+        });
+      }
+
+      setTimeout(() => {
+        artEl.classList.remove("is-swapping");
+        bgEl.classList.remove("is-swapping");
+      }, 700);
+    }
+
+    function parseTrack(data) {
+      const rawArtist = data.artist || "";
+      const rawTitle = data.title || "";
+
+      if (rawArtist && rawTitle) {
+        return { artist: rawArtist, title: rawTitle };
+      }
+
+      if (rawTitle.includes(" - ")) {
+        const parts = rawTitle.split(" - ");
+        return {
+          artist: parts.shift().trim() || "Raadio 2",
+          title: parts.join(" - ").trim() || "R2"
+        };
+      }
+
+      return {
+        artist: "Raadio 2",
+        title: rawTitle || "R2"
+      };
+    }
+
+    function startBackgroundPulse() {
+      function tick() {
+        const t = performance.now() / 1000;
+        const brightness = 0.78 + (Math.sin(t * 0.10) * 0.016) + (Math.sin(t * 0.035) * 0.008);
+        document.documentElement.style.setProperty("--bg-brightness", brightness.toFixed(3));
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    function resetProgressLine() {
+      progressDirection = 1;
+      progressStartAt = performance.now();
+
+      nowPlayingFillEl.style.transition = "transform 220ms ease-out";
+      nowPlayingFillEl.style.transform = "translateX(-6%)";
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nowPlayingFillEl.style.transition = "";
+        });
+      });
+    }
+
+    function startProgressLineMotion() {
+      const duration = 30000;
+      const minPos = -6;
+      const maxPos = 178;
+
+      function tick(now) {
+        const elapsed = now - progressStartAt;
+        const cycleProgress = Math.min(elapsed / duration, 1);
+
+        let pos;
+        if (progressDirection === 1) {
+          pos = minPos + (maxPos - minPos) * cycleProgress;
+        } else {
+          pos = maxPos - (maxPos - minPos) * cycleProgress;
+        }
+
+        nowPlayingFillEl.style.transform = `translateX(${pos}%)`;
+
+        if (cycleProgress >= 1) {
+          progressDirection = progressDirection === 1 ? -1 : 1;
+          progressStartAt = now;
+        }
+
+        progressAnimFrame = requestAnimationFrame(tick);
+      }
+
+      if (progressAnimFrame) {
+        cancelAnimationFrame(progressAnimFrame);
+      }
+
+      progressAnimFrame = requestAnimationFrame(tick);
+    }
+
+    async function initPlayer() {
+      try {
+        if (!window.shaka) {
+          setPlayerStatus("Shaka Player ei laadinud ära.");
+          return;
+        }
+
+        shaka.polyfill.installAll();
+
+        if (!shaka.Player.isBrowserSupported()) {
+          setPlayerStatus("See brauser ei toeta playerit.");
+          return;
+        }
+
+        mediaEl = document.createElement("video");
+        mediaEl.setAttribute("playsinline", "");
+        mediaEl.autoplay = false;
+        mediaEl.controls = false;
+        mediaEl.muted = false;
+
+        playerContainerEl.innerHTML = "";
+        playerContainerEl.appendChild(mediaEl);
+
+        shakaPlayer = new shaka.Player(mediaEl);
+        shakaUi = new shaka.ui.Overlay(shakaPlayer, playerContainerEl, mediaEl);
+        shakaControls = shakaUi.getControls();
+
+        shakaUi.configure({
+          addSeekBar: false,
+          controlPanelElements: [
+            "play_pause",
+            "mute",
+            "volume",
+            "spacer",
+            "overflow_menu"
+          ],
+          overflowMenuButtons: [
+            "playback_rate",
+            "language",
+            "picture_in_picture"
+          ]
+        });
+
+        shakaPlayer.addEventListener("error", (event) => {
+          const error = event.detail;
+          console.error("Shaka player error:", error);
+          setPlayerStatus("Striimi viga" + (error?.code ? ` (${error.code})` : "."));
+        });
+
+        shakaControls.addEventListener("error", (event) => {
+          const error = event.detail;
+          console.error("Shaka UI error:", error);
+          setPlayerStatus("Mängija viga" + (error?.code ? ` (${error.code})` : "."));
+        });
+
+        mediaEl.addEventListener("play", () => {
+          setPlayerStatus("Mängib.");
+          updateBigPlayState();
+        });
+
+        mediaEl.addEventListener("pause", () => {
+          setPlayerStatus("Peatatud.");
+          updateBigPlayState();
+        });
+
+        mediaEl.addEventListener("waiting", () => {
+          setPlayerStatus("Puhverdan...");
+        });
+
+        mediaEl.addEventListener("loadeddata", () => {
+          setPlayerStatus("Valmis.");
+          updateBigPlayState();
+        });
+
+        mediaEl.addEventListener("error", () => {
+          setPlayerStatus("Meediaelement andis vea.");
+          updateBigPlayState();
+        });
+
+        setPlayerStatus("Laen striimi...");
+        await shakaPlayer.load(HLS_STREAM);
+        mediaEl.volume = Number(volumeSlider.value || 1);
+        updateBigPlayState();
+        setPlayerStatus("Valmis. Vajuta Play.");
+      } catch (error) {
+        console.error("initPlayer error:", error);
+        setPlayerStatus("Mängija käivitamine ebaõnnestus.");
+      }
+    }
+
+    bigPlayBtn.addEventListener("click", async () => {
+      try {
+        if (!mediaEl) return;
+
+        if (mediaEl.paused) {
+          await mediaEl.play();
+        } else {
+          mediaEl.pause();
+        }
+
+        updateBigPlayState();
+      } catch (error) {
+        console.error("play button error", error);
+        setPlayerStatus("Taasesitust ei saanud käivitada.");
+        updateBigPlayState();
+      }
+    });
+
+    volumeSlider.addEventListener("input", () => {
+      if (!mediaEl) return;
+      mediaEl.volume = Number(volumeSlider.value);
+    });
+
+    async function update() {
+      try {
+        const res = await fetch("/api/station", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        });
+
+        const data = await res.json();
+        const track = parseTrack(data);
+        const newTrackKey = `${track.artist}__${track.title}`;
+
+        const changed = newTrackKey !== currentTrackKey;
+        currentTrackKey = newTrackKey;
+
+        artistEl.textContent = track.artist;
+        titleEl.textContent = track.title;
+
+        const isNews = track.title === "Uudised" || track.artist === "Uudised";
+        const artworkToUse = isNews ? FALLBACK : (data.artwork || FALLBACK);
+
+        await updateArtwork(artworkToUse);
+
+        if (isNews) {
+          applyNewsTheme();
+        }
+
+        if (changed) {
+          bumpNowPlaying();
+          resetProgressLine();
+        }
+      } catch (e) {
+        console.log("update error", e);
+      }
+    }
+
+    startBackgroundPulse();
+    startProgressLineMotion();
+    resetProgressLine();
+    initPlayer();
+    update();
+    setInterval(update, 5000);
+  </script>
+</body>
+</html>

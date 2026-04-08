@@ -1,0 +1,18 @@
+{
+  "name": "raadio2-stream-app",
+  "version": "1.0.0",
+  "description": "Simple Node app for playing ERR Raadio 2 HLS stream",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "cheerio": "^1.2.0",
+    "express": "^4.22.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
