@@ -415,105 +415,6 @@
       }
     }
 
-    .live-badge-row {
-      width: 100%;
-      max-width: 360px;
-      display: flex;
-      justify-content: flex-start;
-      margin-top: 2px;
-    }
-
-    .live-badge {
-      appearance: none;
-      border: none;
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-      min-height: 28px;
-      padding: 6px 11px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      box-shadow:
-        0 8px 20px rgba(0,0,0,0.22),
-        inset 0 0 0 1px rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition:
-        transform 180ms ease,
-        background 220ms ease,
-        box-shadow 220ms ease,
-        opacity 220ms ease,
-        color 220ms ease;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .live-badge:hover {
-      transform: translateY(-1px);
-      background: rgba(255,255,255,0.10);
-    }
-
-    .live-badge:active {
-      transform: translateY(0);
-    }
-
-    .live-badge.is-hidden {
-      opacity: 0;
-      pointer-events: none;
-      width: 0;
-      padding-left: 0;
-      padding-right: 0;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    .live-badge.is-live {
-      background: rgba(var(--live-red-rgb), 0.18);
-      color: #ffffff;
-      box-shadow:
-        0 8px 20px rgba(0,0,0,0.22),
-        inset 0 0 0 1px rgba(var(--live-red-rgb), 0.24),
-        0 0 18px rgba(var(--live-red-rgb), 0.14);
-    }
-
-    .live-badge.is-behind {
-      background: rgba(255,255,255,0.08);
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35);
-      transition: background 700ms ease;
-    }
-
-    .live-badge.is-live .live-dot {
-      background: var(--live-red);
-      box-shadow: 0 0 0 0 rgba(var(--live-red-rgb), 0.35);
-      animation: liveDotPulse 2.2s ease-in-out infinite;
-    }
-
-    @keyframes liveDotPulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(var(--live-red-rgb), 0.35);
-        opacity: 0.95;
-      }
-      50% {
-        transform: scale(1.15);
-        box-shadow: 0 0 0 8px rgba(var(--live-red-rgb), 0);
-        opacity: 1;
-      }
-    }
-
     .bottom-block {
       display: flex;
       flex-direction: column;
@@ -912,12 +813,6 @@
         text-align: center;
       }
 
-      .live-badge-row {
-        justify-content: center;
-        max-width: 100%;
-        margin-top: 0;
-      }
-
       .bottom-block {
         gap: 14px;
       }
@@ -986,13 +881,6 @@
               <div id="title" class="title">Laadimine...</div>
             </div>
           </div>
-
-          <div class="live-badge-row">
-            <button id="liveBadge" class="live-badge is-hidden" type="button" aria-label="Mine live striimi peale">
-              <span class="live-dot"></span>
-              <span id="liveBadgeText">LIVE</span>
-            </button>
-          </div>
         </div>
 
         <div class="bottom-block">
@@ -1055,8 +943,6 @@
     const bigPlayIcon = document.getElementById("bigPlayIcon");
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeWrap = document.getElementById("volumeWrap");
-    const liveBadge = document.getElementById("liveBadge");
-    const liveBadgeText = document.getElementById("liveBadgeText");
 
     let currentArtwork = null;
     let currentTrackKey = "";
@@ -1516,8 +1402,7 @@
       try {
         navigator.mediaSession.setActionHandler("play", async () => {
           if (mediaEl?.paused) {
-            await mediaEl.play();
-            updateBigPlayState();
+            await goToLiveEdgeAndPlay();
           }
         });
 
@@ -1608,40 +1493,22 @@
       progressAnimFrame = requestAnimationFrame(tick);
     }
 
-    function isAtLiveEdge() {
-      if (!mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) {
-        return false;
-      }
+    function seekToLiveEdge() {
+      if (!mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) return false;
 
       const range = shakaPlayer.seekRange();
       if (!range || !Number.isFinite(range.end)) return false;
 
-      const diff = range.end - mediaEl.currentTime;
-      return diff <= 4;
-    }
-
-    function updateLiveBadge() {
-      if (!liveBadge || !mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) {
-        if (liveBadge) liveBadge.classList.add("is-hidden");
-        return;
-      }
-
-      liveBadge.classList.remove("is-hidden");
-
-      const atLive = isAtLiveEdge();
-      liveBadge.classList.toggle("is-live", atLive);
-      liveBadge.classList.toggle("is-behind", !atLive);
-      liveBadgeText.textContent = atLive ? "LIVE" : "mine LIVE";
-    }
-
-    function goToLiveEdge() {
-      if (!mediaEl || !shakaPlayer || !shakaPlayer.isLive || !shakaPlayer.isLive()) return;
-
-      const range = shakaPlayer.seekRange();
-      if (!range || !Number.isFinite(range.end)) return;
-
       mediaEl.currentTime = Math.max(range.end - 2, range.start || 0);
-      updateLiveBadge();
+      return true;
+    }
+
+    async function goToLiveEdgeAndPlay() {
+      if (!mediaEl) return;
+
+      seekToLiveEdge();
+      await mediaEl.play();
+      updateBigPlayState();
     }
 
     async function initPlayer() {
@@ -1702,41 +1569,31 @@
         mediaEl.addEventListener("play", () => {
           setPlayerStatus("");
           updateBigPlayState();
-          updateLiveBadge();
         });
 
         mediaEl.addEventListener("pause", () => {
           setPlayerStatus("");
           updateBigPlayState();
-          updateLiveBadge();
         });
 
         mediaEl.addEventListener("waiting", () => {
-          setPlayerStatus("Puhverdan...");
-          updateLiveBadge();
+          setPlayerStatus("");
         });
 
         mediaEl.addEventListener("loadeddata", () => {
           setPlayerStatus("");
           updateBigPlayState();
-          updateLiveBadge();
-        });
-
-        mediaEl.addEventListener("timeupdate", () => {
-          updateLiveBadge();
         });
 
         mediaEl.addEventListener("error", () => {
           setPlayerStatus("Meediaelement andis vea.");
           updateBigPlayState();
-          updateLiveBadge();
         });
 
         await shakaPlayer.load(HLS_STREAM);
         mediaEl.volume = Number(volumeSlider.value || 1);
         updateVolumeThickness();
         updateBigPlayState();
-        updateLiveBadge();
         setPlayerStatus("");
       } catch (error) {
         console.error("initPlayer error:", error);
@@ -1749,33 +1606,15 @@
         if (!mediaEl) return;
 
         if (mediaEl.paused) {
-          await mediaEl.play();
+          await goToLiveEdgeAndPlay();
         } else {
           mediaEl.pause();
+          updateBigPlayState();
         }
-
-        updateBigPlayState();
-        updateLiveBadge();
       } catch (error) {
         console.error("play button error", error);
         setPlayerStatus("Taasesitust ei saanud käivitada.");
         updateBigPlayState();
-        updateLiveBadge();
-      }
-    });
-
-    liveBadge.addEventListener("click", async () => {
-      try {
-        goToLiveEdge();
-
-        if (mediaEl && mediaEl.paused) {
-          await mediaEl.play();
-        }
-
-        updateBigPlayState();
-        updateLiveBadge();
-      } catch (error) {
-        console.error("live badge error", error);
       }
     });
 
@@ -1837,7 +1676,7 @@
     resetProgressLine();
     initPlayer();
     update();
-    setInterval(update, 5000);
+    setInterval(update, 10000);
   </script>
 </body>
 </html>
